@@ -167,7 +167,7 @@
                 return $row.find("td:nth-child(" + num + ")").text();
             }
 
-            var rating = trim(cellText(5));
+            var rating = trim(cellText(4));
             if (rating == "+/-") {
                 rating = "(" + rating + ")";
             } else if (rating) {

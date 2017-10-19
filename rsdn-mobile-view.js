@@ -62,6 +62,11 @@
         $('main.main').css({ padding: 0, "min-width": 0 });
 
         $("table.forum-group").find("td, th").not(":first-child").remove();
+
+        $("table.forum-group div.forum-name a").each(function () {
+            var group = $(this).attr("href").split(/\//).pop();
+            $(this).attr("href", "/Forum/MsgList.aspx?flat=1&group=" + trim(group));
+        });
     }
 
     function processTopicsList() {
@@ -119,6 +124,8 @@
 
             var content = $("<td style='padding: 10px 8px;'/>")
                 .append($inner);
+
+            $row.css("background-color", "#d4f7d4");
 
             $row.prepend(content);
         }

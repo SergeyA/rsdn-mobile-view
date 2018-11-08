@@ -1,3 +1,4 @@
+// https://rawgit.com/SergeyA/rsdn-mobile-view/master/rsdn-mobile-view.js
 (function () {
 
     if (!isMobileBrowser())
@@ -28,6 +29,11 @@
 
         if (href.indexOf("MsgList.aspx") >= 0) {
             processTopicsList();
+            return;
+        }
+
+        if (href.indexOf("NewMsg.aspx") >= 0) {
+            processMsgEdit();
             return;
         }
 
@@ -233,6 +239,56 @@
         $("body, div.m, td.i, td.ii").css("font-family", "Roboto,Verdana,Geneva,sans-serif");
     }
 
+		function processMsgEdit() {
+			$("head").append('<meta name="viewport" content="width=device-width, initial-scale=1"/>');
+			$("head").append("<link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>");
+
+			// Настраиваем размер тулбара
+			$(".toolbar-row").css({ "height": "auto" });
+			$(".toolbar-row td").css({ "height": "auto", "max-height": "115px" });
+			//$(".tb-btn").css({ "height": "20px", "min-width": "20px", "font-size": "16px" });
+
+			// Упрощаем поле ввода темы сообщения
+			var subj = $("#subj");
+			var subjParent = subj.parent();
+			
+			subj
+				.css({ "width": "100%" })	
+				.detach();
+				
+			subjParent.empty();
+			subjParent.append(subj);
+				
+			$("textarea[name='msgEdit']").attr('rows', '15');
+			
+			// Удаляем поле ввода названия сообщения (экономим место в мобильном интерфейсе)
+			$("#messageNameRow").remove();
+			
+			// Удаляем иконку виртуальной клавиатуры (на мобильных устройствах есть своя экранная клавиатура)
+			// Т.к. иконка клавиатуры добавляется уже после загрузки страницы, единственный способ удалить ее - это повесить стиль display:none на селектор
+			// $(".keyboardInputInitiator").remove(); - это не работает
+			var styleElm = document.createElement('style');
+			document.head.appendChild(styleElm);
+			var styleSheet = styleElm.sheet;			
+			styleSheet.insertRule(".keyboardInputInitiator { display: none }");
+			
+			// Удаляем комментарий к полю с тэгами (экономим место в мобильном интерфейсе)
+			$("#tag-edit").parent().find("small").remove();
+			
+			// Разносим по строкам нагромождение контролов в нижней части формы
+			$("input[name='name'], input[name='pwd']").css("width", "120px");
+			$("input[name='preview']").before("<br/><br/>");
+			$("a#upload").next("span").css("margin-left", "0");
+			$("a#upload").after("<br/><br/>");
+			$("input#nosmile").before("<br/>");
+			
+			// Удаляем кнопки для проверки правописания (экономим место в мобильном интерфейсе)
+			$("button[name='cmdSpell']").closest('tr').remove();
+			
+			// Переключаем шрифт на Roboto
+			$("body, div.m, td.i, td.ii, textarea").css("font-family", "Roboto,Verdana,Geneva,sans-serif");
+		}
+		
     // utils
 
     function isMobileBrowser() {

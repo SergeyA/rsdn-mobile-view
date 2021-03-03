@@ -41,6 +41,14 @@
             processPostsList();
             return;
         }
+
+        // Перенаправление на плоский вид страницы просмотра топика /forum/flame.comp/nnnnn => /forum/flame.comp/nnnnn.flat
+        var topicNoFlat = /\/forum\/(.*)\/(\d+)$/
+        if (topicNoFlat.exec(href)) { 
+            var flatHref = href + ".flat";
+            console.debug("Redirect to topic flat view " + flatHref);
+            window.location = flatHref;
+        }
     }
 
     function processHomePage() {
@@ -77,18 +85,29 @@
 
     function processTopicsList() {
 
-        // Переключаемся на "плоский" список тем
-        var flatViewHref = setHrefParam(window.location.href, "flat", "1");
+        var href = window.location.href;
+
+        var forum = getHrefParam(href, "forum");
+        var mid = getHrefParam(href, "mid");
+        if (mid && forum) {
+            // Переключаемся на страницу просмотра конкретной темы. 
+            // При навигации на конкретную тему с главной страницы в иерерхическом режиме, открывается список тем, а не конкретная тема
+            // см. http://rsdn.org/forum/rsdn/7774236.1
+            href = "/forum/" + forum + "/" + mid + ".flat";
+        } else {
+            // Переключаемся на "плоский" список тем
+            href = setHrefParam(href, "flat", "1");
+        }
 
         if (inFrame()) {
-            console.debug("Redirect parent frame to " + flatViewHref);
-            window.top.location = flatViewHref;
+            console.debug("Redirect parent frame to " + href);
+            window.top.location = href;
             return;
         }
 
-        if (window.location.href != flatViewHref) {
-            console.debug("Redirect to " + flatViewHref + " to switch flat view ON");
-            window.location = flatViewHref;
+        if (window.location.href != href) {
+            console.debug("Redirect to " + href);
+            window.location = href;
             return;
         }
 
@@ -342,6 +361,20 @@
         }
 
         return href;
+    }
+
+    function getHrefParam(href, param) {
+        
+        var parts = href.split("?");
+        
+        if (parts.length < 2)
+            return "";
+        
+        return parts[1]
+            .split("&")
+            .map(p=> p.split("="))
+            .filter(p => p.length > 1 && p[0] == param)
+            .map(p => p[1])[0] ?? "";
     }
 
     function setCookie(name, value, expires, path, domain, secure) {
